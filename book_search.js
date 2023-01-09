@@ -21,10 +21,80 @@
  function findSearchTermInBooks(searchTerm, scannedTextObj) {
     /** You will need to implement your search and 
      * return the appropriate object here. */
+    var matches = [];
+    var matchLocal = [];
+    // We first need to turn JSON to JS obj
+    var inputArray = JSON.parse(scannedTextObj);
+    let txt = "";
+    // Now we can go through each of the contents and look for the text
+    // for (let i = 0; i < inputArray.length; i++) {
+    //     txt = inputArray[i].Text;
+
+    //     for (let j=0; j < searchTerm.length; j++) {
+    //         if (txt(i+j)=='-') {
+    //             break;
+    //         }
+    //         if (searchTerm.charAt(j)!=txt(i+j)) {
+    //             j = searchTerm.length;
+    //         }
+            
+    // }
+
+        
+    // }
+    // first, pull out the contents
+    for (let n=0; n<inputArray.length; n++) {
+        var bookContent = inputArray[n].Content;
+        //now, pull out the text
+        for (let j = 0; j < bookContent.length; j++) {
+            currText = bookContent[j].Text;
+
+            // now, lets remove the hyphens at the end of lines
+            if (currText.charAt[(currText.length-1)]=='-') {
+                currText = currText.substring(0,currText.length-1);
+            }
+            // and concatenate the text into one string.
+            txt = txt.concat(currText);
+        }
+        //now, compare searchTerm to Text
+        for (let i = 0; i<(txt.length-searchTerm.length); i++) {
+            if (txt.substring(i, searchTerm.length-1) == searchTerm) {
+                matches.push(i);
+            }
+        }
+        
+        /* now that we have all the indices for the matches, we
+        can add the corresponding lines to the results.
+        */
+        for (let i=0; i<matches.length; i++) {
+            let startPosition = matches.shift();
+            let endPosition = startPosition + searchTerm.length;
+            
+            for (let j = 0; j < bookContent.length; j++) {
+                currText = bookContent[j].Text;
+
+                if (currText.charAt[(currText.length-1)]=='-') {
+                    currText = currText.substring(0,currText.length-1);
+                }
+
+                if (startPosition-currText.length <= 0) {
+                    matchLocal.push([inputArray[n].ISBN, bookContent[j].Page, bookContent[j].Line]);
+                    startPosition = 1/0;
+                }
+                else { startPosition -= currText.length; }
+                if (!isFinite(startPosition) && endPosition > 0) {
+                    matchLocal.push([inputArray[n].ISBN, bookContent[j].Page, bookContent[j].Line]);
+                    endPosition -= currText.length;
+                }
+                
+            }
+        }
+    }
+
 
     var result = {
-        "SearchTerm": "",
-        "Results": []
+        "SearchTerm": searchTerm,
+        "Results": matchLocal
     };
     
     return result; 
