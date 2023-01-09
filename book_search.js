@@ -24,7 +24,7 @@
     var matches = [];
     var matchLocal = [];
     // We first need to turn JSON to JS obj
-    var inputArray = JSON.parse(scannedTextObj);
+    var inputArray = scannedTextObj;
     let txt = "";
     // Now we can go through each of the contents and look for the text
     // for (let i = 0; i < inputArray.length; i++) {
@@ -48,17 +48,16 @@
         //now, pull out the text
         for (let j = 0; j < bookContent.length; j++) {
             currText = bookContent[j].Text;
-
             // now, lets remove the hyphens at the end of lines
-            if (currText.charAt[(currText.length-1)]=='-') {
+            if (currText.charAt(currText.length-1)=="-") {
                 currText = currText.substring(0,currText.length-1);
             }
             // and concatenate the text into one string.
             txt = txt.concat(currText);
         }
         //now, compare searchTerm to Text
-        for (let i = 0; i<(txt.length-searchTerm.length); i++) {
-            if (txt.substring(i, searchTerm.length-1) == searchTerm) {
+        for (let i = 0; i<txt.length-(searchTerm.length-1); i++) {
+            if (txt.substring(i, i+searchTerm.length) == searchTerm) {
                 matches.push(i);
             }
         }
@@ -68,30 +67,26 @@
         */
         for (let i=0; i<matches.length; i++) {
             let startPosition = matches.shift();
-            let endPosition = startPosition + searchTerm.length;
-            
+
             for (let j = 0; j < bookContent.length; j++) {
                 currText = bookContent[j].Text;
 
-                if (currText.charAt[(currText.length-1)]=='-') {
+                if (currText.charAt(currText.length-1)=='-') {
                     currText = currText.substring(0,currText.length-1);
                 }
 
                 if (startPosition-currText.length <= 0) {
-                    matchLocal.push([inputArray[n].ISBN, bookContent[j].Page, bookContent[j].Line]);
+                    matchLocal.push(["ISBN:" + inputArray[n].ISBN, "Page:" + bookContent[j].Page, "Line:" + bookContent[j].Line]);
                     startPosition = 1/0;
                 }
-                else { startPosition -= currText.length; }
-                if (!isFinite(startPosition) && endPosition > 0) {
-                    matchLocal.push([inputArray[n].ISBN, bookContent[j].Page, bookContent[j].Line]);
-                    endPosition -= currText.length;
-                }
+                
+                else { 
+                    startPosition -= currText.length;
+                    }
                 
             }
         }
     }
-
-
     var result = {
         "SearchTerm": searchTerm,
         "Results": matchLocal
@@ -171,4 +166,28 @@ if (test2result.Results.length == 1) {
     console.log("FAIL: Test 2");
     console.log("Expected:", twentyLeaguesOut.Results.length);
     console.log("Received:", test2result.Results.length);
+}
+const test3result = findSearchTermInBooks("Canadian", twentyLeaguesIn); 
+if (test3result.Results.length == 1) {
+    console.log("PASS: Test 3");
+} else {
+    console.log("FAIL: Test 3");
+    console.log("Expected:", 1);
+    console.log("Received:", test3result.Results.length);
+}
+const test4result = findSearchTermInBooks("taco", twentyLeaguesIn); 
+if (test4result.Results.length == 0) {
+    console.log("PASS: Test 4");
+} else {
+    console.log("FAIL: Test 4");
+    console.log("Expected:", 0);
+    console.log("Received:", test4result.Results.length);
+}
+const test5result = findSearchTermInBooks("canadian", twentyLeaguesIn); 
+if (test5result.Results.length == 0) {
+    console.log("PASS: Test 5");
+} else {
+    console.log("FAIL: Test 5");
+    console.log("Expected:", 0);
+    console.log("Received:", test5result.Results.length);
 }
